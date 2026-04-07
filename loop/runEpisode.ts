@@ -1,60 +1,44 @@
 import { generateResponse } from "../llm/generator.js";
 import { judgeResponse } from "../llm/judge.js";
-import { improvePrompt } from "../llm/editor.js";
+import { chooseAction, updateQ } from "../agent/policy.js";
+import { computeReward } from "../env/reward.js";
 
-export async function runEpisode(task: string) {
-  let prompt = task;
-  let bestPrompt = prompt;
+export async function runEpisode(task: string, taskLevel: string, episodes = 5) {
+  console.log(`\n🚀 Starting Training Episode for [${taskLevel}]: ${task}`);
+  
   let bestScore = 0;
+  let bestConfig: any = null;
   let prevScore = 0;
 
-  console.log("Starting Episode");
-  console.log("Task: ", task);
+  for (let i = 0; i < episodes; i++) {
+    const action = chooseAction(taskLevel);
+    const { model, mode, persona } = action;
 
-  for (let step = 0; step < 5; step++) {
-    console.log(`\n--- Step ${step} ---`);
-    console.log("Current prompt: ", prompt);
+    console.log(`\n--- Trial ${i + 1} ---`);
+    console.log(`Config: Model=[${model}] | Mode=[${mode}] | Persona=[${persona}]`);
 
     // 1. Generate Output
-    const output = await generateResponse(prompt);
-    console.log("\n Generated Output: ");
-    console.log(output.slice(0, 200), "...");
+    const output = await generateResponse(task, model, mode, persona);
 
-    // 2. Judge Evaluation
+    // 2. Evaluate Quality
     const result = await judgeResponse(task, output);
     const score = result.score || 0;
-    const rationale = result.rationale || "No rationale";
+    
+    // 3. Reward (incorporates cost internally)
+    const reward = computeReward(score,prevScore, action);
+    prevScore = score;
+    updateQ(taskLevel, action, reward);
 
-    console.log("Judge Score: ", score);
-    console.log("Rationale: ", rationale);
+    console.log(`Result: Quality Score=${score} | Reward=${reward.toFixed(2)}`);
 
-    // 3. Reward
-    const reward = score - prevScore;
-    console.log("Reward: ", reward);
-
-    // 4. Track best prompt
+    console.log("PrevScore:", prevScore, "→ Current:", score);
     if (score > bestScore) {
       bestScore = score;
-      bestPrompt = prompt;
-    }
-
-    // 5. Improve prompt
-    const newPrompt = await improvePrompt(task, prompt);
-    console.log("\n Improved prompt: ");
-    console.log(newPrompt);
-
-    // 6. Accept / Reject logic
-    if (score >= prevScore) {
-      prompt = newPrompt;
-      prevScore = score;
-      console.log("Accepted improvement");
-    } else {
-      console.log("Rejected (no improvement)");
+      bestConfig = action;
     }
   }
-  console.log("\n🏆 FINAL RESULT");
-  console.log("========================");
-  console.log("Best Score:", bestScore);
-  console.log("Best Prompt:", bestPrompt);
-  return { bestPrompt, bestScore };
+
+  console.log(`\n[${taskLevel}] BEST CONFIG DISCOVERED:`, JSON.stringify(bestConfig, null, 2));
+  return { bestConfig, bestScore };
 }
+

@@ -1,17 +1,35 @@
 import "dotenv/config";
 import { runEpisode } from "./loop/runEpisode.js";
+import { tasks } from "./env/tasks.js";
 
 async function main() {
-  const task = "Write a viral LinkedIn post about AI";
-  const result = await runEpisode(task);
+  console.log("🔥 Starting PromptRL Training Suite");
+  console.log("Goal: Discover configurations that maximize Quality/Cost");
 
-  console.log("\n🎉 DONE");
-  console.log(result);
+  const results = [];
+
+  for (const taskObj of tasks) {
+    // Run training for each task level
+    const result = await runEpisode(taskObj.task, taskObj.level, 10);
+    results.push({
+      level: taskObj.level,
+      task: taskObj.task,
+      ...result
+    });
+  }
+
+  console.log("\n\n📊 FINAL RL SUMMARY");
+  console.log("==================================================");
+  results.forEach(r => {
+    console.log(`[${r.level}] Best Model: ${r.bestConfig.model} | Mode: ${r.bestConfig.mode} | Persona: ${r.bestConfig.persona} (Score: ${r.bestScore})`);
+  });
 }
+
 main()
-  .then((r) => {
-    console.log("Response: ", r);
+  .then(() => {
+    console.log("\n✅ Suite finished.");
   })
   .catch((e) => {
-    console.log(e);
+    console.error("❌ Fatal Error:", e);
   });
+
