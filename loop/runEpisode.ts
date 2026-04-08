@@ -6,8 +6,8 @@ import { computeReward } from "../env/reward.js";
 export async function runEpisode(
   task: string,
   taskLevel: string,
-  episodes = 5,
-  verbose = true,
+  episodes = 8,
+  verbose = false,
 ) {
   console.log(`\n🚀 Starting Training Episode for [${taskLevel}]: ${task}`);
 
@@ -38,7 +38,11 @@ export async function runEpisode(
 
     // 3. Reward (incorporates cost internally)
     const reward = computeReward(score, prevScore, action);
-    console.log("PrevScore:", prevScore, "→ Current:", score);
+    if (verbose) {
+      console.log("PrevScore:", prevScore, "→ Current:", score);
+      console.log(`Reward: ${reward.toFixed(2)}`);
+    }
+
     prevScore = score;
     updateQ(taskLevel, action, reward);
 

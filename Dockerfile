@@ -2,4 +2,4 @@ FROM node:20
 WORKDIR /app
 COPY . .
 RUN npm install
-CMD [ "npx","tsx","scripts/runBaseline.ts" ]
+CMD ["npx", "tsx", "scripts/runFinal.ts"]
