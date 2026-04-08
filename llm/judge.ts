@@ -1,4 +1,8 @@
-import ollama from "ollama";
+import { Ollama } from "ollama";
+
+const ollama = new Ollama({
+  host: "http://host.docker.internal:11434",
+});
 
 export async function judgeResponse(task: string, response: string) {
   const prompt = `

@@ -1,0 +1,21 @@
+name: PromptRL
+description: RL environment for optimizing LLM configuration
+
+observation_space:
+  task: string
+  prompt: string
+  prevScore: number
+
+action_space:
+  model: [llama3.1, llama3.2, qwen2.5]
+  mode: [fast, deep]
+  persona: [teacher, analyst, creative, concise]
+
+reward:
+  type: continuous
+  range: [0, 1]
+
+tasks:
+  - easy
+  - medium
+  - hard
