@@ -4,6 +4,10 @@ PromptRL is a small TypeScript reinforcement learning project for learning cost-
 
 Instead of sending every task through the same model and prompt style, PromptRL explores a discrete action space and optimizes for output quality relative to inference cost.
 
+## Demo
+<img width="1455" height="814" alt="Screenshot 2026-04-08 at 18 20 21" src="https://github.com/user-attachments/assets/a6d1540c-869f-48d9-8543-e7acbca96a71" />
+<img width="1443" height="830" alt="Screenshot 2026-04-08 at 18 20 49" src="https://github.com/user-attachments/assets/09e25460-efdd-4e6a-be54-c54207863259" />
+
 ## What It Does
 
 For each task level (`easy`, `medium`, `hard`), the agent chooses an action made up of:
